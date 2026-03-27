@@ -1,4 +1,6 @@
 import os
+import base64
+import json
 from flask import Flask, render_template, request
 from azure.communication.email import EmailClient
 from azure.identity import DefaultAzureCredential
@@ -9,6 +11,27 @@ ACS_ENDPOINT = os.getenv("ACS_ENDPOINT")
 ACS_SENDER_ADDRESS = os.getenv("ACS_SENDER_ADDRESS")
 
 
+def get_user_info(req):
+    principal = req.headers.get("X-MS-CLIENT-PRINCIPAL")
+
+    if not principal:
+        return None, None
+
+    decoded = base64.b64decode(principal)
+    user_data = json.loads(decoded)
+
+    name = None
+    email = None
+
+    for claim in user_data.get("claims", []):
+        if claim["typ"] == "name":
+            name = claim["val"]
+        if claim["typ"] in ["preferred_username", "emails"]:
+            email = claim["val"]
+
+    return name, email
+
+
 def send_email(to_email, subject, body):
     credential = DefaultAzureCredential()
     client = EmailClient(ACS_ENDPOINT, credential)
@@ -16,26 +39,17 @@ def send_email(to_email, subject, body):
     message = {
         "senderAddress": ACS_SENDER_ADDRESS,
         "recipients": {
-            "to": [
-                {"address": to_email}
-            ]
+            "to": [{"address": to_email}]
         },
         "content": {
             "subject": subject,
             "plainText": body,
-            "html": f"""
-            <html>
-              <body>
-                <p>{body}</p>
-              </body>
-            </html>
-            """
+            "html": f"<p>{body}</p>"
         }
     }
 
     poller = client.begin_send(message)
-    result = poller.result()
-    return result
+    return poller.result()
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -43,6 +57,8 @@ def index():
     success = None
     tracking_id = None
     error = None
+
+    user_name, user_email = get_user_info(request)
 
     if request.method == "POST":
         to_email = request.form.get("to_email", "").strip()
@@ -57,14 +73,16 @@ def index():
                 success = "Correo enviado correctamente."
                 tracking_id = result.get("id")
             except Exception as ex:
-                error = f"Ocurrió un error: {str(ex)}"
+                error = str(ex)
 
     return render_template(
         "index.html",
         success=success,
         tracking_id=tracking_id,
         error=error,
-        sender_address=ACS_SENDER_ADDRESS
+        sender_address=ACS_SENDER_ADDRESS,
+        user_name=user_name,
+        user_email=user_email
     )
 
 
