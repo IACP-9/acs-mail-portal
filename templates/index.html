@@ -3,48 +3,93 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Portal de correo</title>
+  <title>Portal de envío | LastCall</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f6f9;
+    }
+    .card {
+      border-radius: 12px;
+    }
+    .header-title {
+      font-weight: 600;
+    }
+    .footer {
+      font-size: 0.85rem;
+      color: #6c757d;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
 </head>
-<body class="bg-light">
+
+<body>
+
   <div class="container py-5">
+
+    <!-- HEADER -->
+    <div class="text-center mb-4">
+      <h2 class="header-title">Portal de Envío de Correos</h2>
+      <p class="text-muted">Azure Communication Services · LastCall</p>
+    </div>
+
+    <!-- CARD -->
     <div class="row justify-content-center">
-      <div class="col-lg-7">
+      <div class="col-lg-6">
         <div class="card shadow-sm border-0">
           <div class="card-body p-4">
-            <h2 class="mb-3">Portal de envío</h2>
-            <p class="text-muted">Azure App Service + Python + ACS Email</p>
 
+            <!-- MENSAJES -->
             {% if status %}
-              <div class="alert alert-success">{{ status }}</div>
+              <div class="alert alert-success">
+                <strong>Correo enviado correctamente</strong><br>
+                <small>ID de seguimiento: {{ status }}</small>
+              </div>
             {% endif %}
 
             {% if error %}
-              <div class="alert alert-danger">{{ error }}</div>
+              <div class="alert alert-danger">
+                <strong>Error:</strong> {{ error }}
+              </div>
             {% endif %}
 
+            <!-- FORMULARIO -->
             <form method="post">
+
               <div class="mb-3">
                 <label class="form-label">Correo destinatario</label>
-                <input type="email" class="form-control" name="to_email" required>
+                <input type="email" class="form-control" name="to_email" placeholder="ejemplo@correo.com" required>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Asunto</label>
-                <input type="text" class="form-control" name="subject" required>
+                <input type="text" class="form-control" name="subject" placeholder="Asunto del correo" required>
               </div>
 
               <div class="mb-3">
                 <label class="form-label">Mensaje</label>
-                <textarea class="form-control" name="body" rows="6" required></textarea>
+                <textarea class="form-control" name="body" rows="5" placeholder="Escribe tu mensaje aquí..." required></textarea>
               </div>
 
-              <button type="submit" class="btn btn-primary w-100">Enviar correo</button>
+              <button type="submit" class="btn btn-primary w-100">
+                Enviar correo
+              </button>
+
             </form>
+
           </div>
         </div>
+
+        <!-- FOOTER -->
+        <div class="footer mt-3">
+          Portal interno · Powered by Azure Communication Services
+        </div>
+
       </div>
     </div>
+
   </div>
+
 </body>
 </html>
