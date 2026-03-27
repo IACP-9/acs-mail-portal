@@ -299,7 +299,7 @@
           <h1 class="topbar-title">Portal de envío</h1>
           <p class="topbar-subtitle">Azure Communication Services · Mini portal interno</p>
         </div>
-        <div class="user-badge">Acceso corporativo pendiente</div>
+        <div class="user-badge">Portal interno corporativo</div>
       </div>
 
       <div class="content">
@@ -316,10 +316,13 @@
             </div>
 
             <div class="card-body-custom">
-              {% if status %}
+              {% if success %}
                 <div class="alert-custom alert-success-custom">
-                  <strong>Correo enviado correctamente.</strong><br>
+                  <strong>{{ success }}</strong><br>
                   El mensaje fue aceptado por Azure Communication Services.
+                  {% if tracking_id %}
+                    <br><small>ID de seguimiento: {{ tracking_id }}</small>
+                  {% endif %}
                 </div>
               {% endif %}
 
@@ -371,6 +374,11 @@
                 <div class="info-box mt-3">
                   <div class="info-box-title">Modo de acceso</div>
                   <div class="info-box-value">Managed Identity</div>
+                </div>
+
+                <div class="info-box mt-3">
+                  <div class="info-box-title">Remitente</div>
+                  <div class="info-box-value">{{ sender_address }}</div>
                 </div>
               </div>
             </div>
