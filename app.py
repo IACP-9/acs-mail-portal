@@ -40,7 +40,8 @@ def send_email(to_email, subject, body):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    status = None
+    success = None
+    tracking_id = None
     error = None
 
     if request.method == "POST":
@@ -53,11 +54,18 @@ def index():
         else:
             try:
                 result = send_email(to_email, subject, body)
-                status = f"Correo enviado correctamente. Resultado: {result}"
+                success = "Correo enviado correctamente."
+                tracking_id = result.get("id")
             except Exception as ex:
                 error = f"Ocurrió un error: {str(ex)}"
 
-    return render_template("index.html", status=status, error=error)
+    return render_template(
+        "index.html",
+        success=success,
+        tracking_id=tracking_id,
+        error=error,
+        sender_address=ACS_SENDER_ADDRESS
+    )
 
 
 if __name__ == "__main__":
