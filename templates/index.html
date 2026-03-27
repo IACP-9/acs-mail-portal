@@ -106,10 +106,23 @@
       margin: 2px 0 0 0;
     }
 
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .user-badge {
       background: #eef2ff;
       color: #374151;
       border: 1px solid #dbe4ff;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    .logout-btn {
       border-radius: 999px;
       padding: 8px 14px;
       font-size: 0.88rem;
@@ -272,8 +285,9 @@
         padding: 18px;
       }
 
-      .user-badge {
-        display: none;
+      .topbar-actions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
       }
     }
   </style>
@@ -286,11 +300,6 @@
       <div class="nav-section-title">Portal</div>
       <a href="#" class="nav-link-custom active">Enviar correo</a>
       <a href="#" class="nav-link-custom">Historial</a>
-      <a href="#" class="nav-link-custom">Plantillas</a>
-
-      <div class="nav-section-title">Configuración</div>
-      <a href="#" class="nav-link-custom">Mi cuenta</a>
-      <a href="#" class="nav-link-custom">Preferencias</a>
     </aside>
 
     <main class="main">
@@ -299,7 +308,20 @@
           <h1 class="topbar-title">Portal de envío</h1>
           <p class="topbar-subtitle">Azure Communication Services · Mini portal interno</p>
         </div>
-        <div class="user-badge">Portal interno corporativo</div>
+
+        <div class="topbar-actions">
+          <div class="user-badge">
+            {% if user_name %}
+              Hola, {{ user_name.split(' ')[0] }}
+            {% else %}
+              Hola
+            {% endif %}
+          </div>
+
+          <a href="/.auth/logout" class="btn btn-outline-secondary btn-sm logout-btn">
+            Cerrar sesión
+          </a>
+        </div>
       </div>
 
       <div class="content">
@@ -380,6 +402,13 @@
                   <div class="info-box-title">Remitente</div>
                   <div class="info-box-value">{{ sender_address }}</div>
                 </div>
+
+                {% if user_email %}
+                <div class="info-box mt-3">
+                  <div class="info-box-title">Usuario conectado</div>
+                  <div class="info-box-value">{{ user_email }}</div>
+                </div>
+                {% endif %}
               </div>
             </div>
 
@@ -390,10 +419,10 @@
               </div>
               <div class="card-body-custom">
                 <ul class="mb-0 ps-3">
-                  <li>Inicio de sesión con cuenta corporativa</li>
-                  <li>Mostrar remitente configurado</li>
                   <li>Historial de envíos</li>
+                  <li>Registro de seguimiento</li>
                   <li>Plantillas predefinidas</li>
+                  <li>Validaciones adicionales</li>
                 </ul>
               </div>
             </div>
