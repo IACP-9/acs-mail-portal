@@ -1,0 +1,4 @@
+Flask
+gunicorn
+azure-communication-email
+azure-identity
