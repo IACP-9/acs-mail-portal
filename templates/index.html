@@ -19,6 +19,8 @@
       --success-border: #8bd3a6;
       --danger-bg: #fde7e9;
       --danger-border: #ef9aa4;
+      --warning-bg: #fff7e6;
+      --warning-border: #f3c97a;
     }
 
     body {
@@ -46,7 +48,6 @@
       font-size: 1.6rem;
       font-weight: 700;
       margin-bottom: 32px;
-      letter-spacing: 0.3px;
     }
 
     .nav-section-title {
@@ -162,24 +163,24 @@
       box-shadow: 0 10px 30px rgba(17, 24, 39, 0.06);
     }
 
-    .panel-card .card-header-custom {
+    .card-header-custom {
       padding: 22px 24px 12px;
       border-bottom: 1px solid #f1f5f9;
     }
 
-    .panel-card .card-title-custom {
+    .card-title-custom {
       margin: 0;
       font-size: 1.15rem;
       font-weight: 700;
     }
 
-    .panel-card .card-subtitle-custom {
+    .card-subtitle-custom {
       margin: 6px 0 0 0;
       font-size: 0.92rem;
       color: var(--text-muted);
     }
 
-    .panel-card .card-body-custom {
+    .card-body-custom {
       padding: 24px;
     }
 
@@ -201,6 +202,12 @@
       background: var(--danger-bg);
       border-color: var(--danger-border);
       color: #7f1d1d;
+    }
+
+    .alert-warning-custom {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+      color: #7a4b00;
     }
 
     .form-label {
@@ -259,6 +266,13 @@
       font-size: 1rem;
       font-weight: 600;
       word-break: break-word;
+    }
+
+    .tracking-list {
+      margin-top: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-left: 18px;
     }
 
     .footer-note {
@@ -326,25 +340,41 @@
 
       <div class="content">
         <div class="page-head">
-          <h2>Nuevo correo</h2>
-          <p>Completa los campos para generar y enviar un mensaje desde el portal.</p>
+          <h2>Nuevo correo masivo</h2>
+          <p>Escribe varios destinatarios separados por comas o carga un archivo Excel.</p>
         </div>
 
         <div class="content-grid">
           <section class="panel-card">
             <div class="card-header-custom">
               <h3 class="card-title-custom">Formulario de envío</h3>
-              <p class="card-subtitle-custom">Envía correos usando Azure Communication Services desde una interfaz interna.</p>
+              <p class="card-subtitle-custom">El mismo correo se enviará individualmente a cada destinatario.</p>
             </div>
 
             <div class="card-body-custom">
               {% if success %}
                 <div class="alert-custom alert-success-custom">
                   <strong>{{ success }}</strong><br>
-                  El mensaje fue aceptado por Azure Communication Services.
-                  {% if tracking_id %}
-                    <br><small>ID de seguimiento: {{ tracking_id }}</small>
+                  Total enviados: {{ total_sent }}
+
+                  {% if tracking_ids %}
+                    <div class="tracking-list">
+                      {% for item in tracking_ids %}
+                        <li><strong>{{ item.email }}</strong> — {{ item.id }}</li>
+                      {% endfor %}
+                    </div>
                   {% endif %}
+                </div>
+              {% endif %}
+
+              {% if invalid_emails %}
+                <div class="alert-custom alert-warning-custom">
+                  <strong>Se detectaron correos inválidos.</strong>
+                  <ul class="mb-0 mt-2">
+                    {% for email in invalid_emails %}
+                      <li>{{ email }}</li>
+                    {% endfor %}
+                  </ul>
                 </div>
               {% endif %}
 
@@ -355,10 +385,25 @@
                 </div>
               {% endif %}
 
-              <form method="post">
+              <form method="post" enctype="multipart/form-data">
                 <div class="mb-3">
-                  <label class="form-label">Correo destinatario</label>
-                  <input type="email" class="form-control" name="to_email" placeholder="destinatario@empresa.com" required>
+                  <label class="form-label">Destinatarios manuales</label>
+                  <textarea
+                    class="form-control"
+                    name="recipients"
+                    rows="4"
+                    placeholder="ivor.cerda95@gmail.com, icerda@lastcall.cl"></textarea>
+                  <div class="form-text">
+                    Puedes separar correos con coma, punto y coma o salto de línea.
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Archivo Excel</label>
+                  <input type="file" class="form-control" name="excel_file" accept=".xlsx">
+                  <div class="form-text">
+                    El archivo debe tener una columna llamada <strong>email</strong> o <strong>correo</strong>.
+                  </div>
                 </div>
 
                 <div class="mb-3">
@@ -371,7 +416,7 @@
                   <textarea class="form-control" name="body" rows="7" placeholder="Escribe aquí el contenido del correo..." required></textarea>
                 </div>
 
-                <button type="submit" class="btn-primary-custom">Enviar correo</button>
+                <button type="submit" class="btn-primary-custom">Enviar correos</button>
               </form>
             </div>
           </section>
@@ -414,16 +459,22 @@
 
             <div class="panel-card">
               <div class="card-header-custom">
-                <h3 class="card-title-custom">Notas</h3>
-                <p class="card-subtitle-custom">Próximas mejoras sugeridas para el portal.</p>
+                <h3 class="card-title-custom">Formato sugerido</h3>
+                <p class="card-subtitle-custom">Estructura recomendada para Excel.</p>
               </div>
               <div class="card-body-custom">
-                <ul class="mb-0 ps-3">
-                  <li>Historial de envíos</li>
-                  <li>Registro de seguimiento</li>
-                  <li>Plantillas predefinidas</li>
-                  <li>Validaciones adicionales</li>
-                </ul>
+                <div class="info-box">
+                  <div class="info-box-title">Columna esperada</div>
+                  <div class="info-box-value">email</div>
+                </div>
+
+                <div class="info-box mt-3">
+                  <div class="info-box-title">Ejemplo</div>
+                  <div class="info-box-value">
+                    usuario1@dominio.com<br>
+                    usuario2@dominio.com
+                  </div>
+                </div>
               </div>
             </div>
           </aside>
